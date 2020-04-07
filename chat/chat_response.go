@@ -60,6 +60,7 @@ type ChatItem struct {
 	LiveChatTextMessageRenderer             LiveChatTextMessageRenderer             `json:"liveChatTextMessageRenderer"`
 	LiveChatMembershipItemRenderer          LiveChatMembershipItemRenderer          `json:"liveChatMembershipItemRenderer"`
 	LiveChatPaidMessageRenderer             LiveChatPaidMessageRenderer             `json:"liveChatPaidMessageRenderer"`
+	LiveChatPlaceholderItemRenderer         LiveChatPlaceholderItemRenderer         `json:"liveChatPlaceholderItemRenderer"`
 }
 
 type LiveChatTickerItem struct {
@@ -118,6 +119,11 @@ type LiveChatPaidMessageRenderer struct {
 	HeaderTextColor          int                 `json:"headerTextColor"`
 	BodyBackgroundColor      int                 `json:"bodyBackgroundColor"`
 	BodyTextColor            int                 `json:"bodyTextColor"`
+}
+
+type LiveChatPlaceholderItemRenderer struct {
+	ID            string `json:"id"`
+	TimestampUsec string `json:"timestampUsec"`
 }
 
 type LiveChatTickerPaidMessageItemRenderer struct {

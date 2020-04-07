@@ -14,23 +14,44 @@ func TestNew(t *testing.T) {
 
 func TestFetch(t *testing.T) {
 	chatlog, _ := New("fzd9nzDpjh0")
-	resp, err := chatlog.Fecth()
-	if err != nil {
-		t.Fatal("Should be succeeded", err)
-	}
 
-	for _, continuationAction := range resp {
-		for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
-			l := chatAction.AddChatItemAction.Item.LiveChatTextMessageRenderer
-			fmt.Printf("%s %s: ", l.TimestampText.SimpleText, l.AuthorName.SimpleText)
-			for _, run := range l.Message.Runs {
-				if run.Text != "" {
-					fmt.Print(run.Text)
-				} else if s := run.Emoji.Shortcuts[0]; s != "" {
-					fmt.Print(s)
+	for c := 0; c < 100; c++ {
+		resp, err := chatlog.Fecth()
+		if err != nil {
+			t.Fatal("Should be succeeded", err)
+		}
+		for i, continuationAction := range resp {
+			for j, chatAction := range continuationAction.ReplayChatItemAction.Actions {
+				chatItem := chatAction.AddChatItemAction.Item
+				liveChatTickerItem := chatAction.AddLiveChatTickerItemAction.Item
+				if chatItem.LiveChatViewerEngagementMessageRenderer.ID != "" {
+					continue
 				}
+				if chatItem.LiveChatTextMessageRenderer.ID != "" {
+					continue
+				}
+				if chatItem.LiveChatMembershipItemRenderer.ID != "" {
+					continue
+				}
+				if chatItem.LiveChatMembershipItemRenderer.ID != "" {
+					continue
+				}
+				if chatItem.LiveChatPaidMessageRenderer.ID != "" {
+					continue
+				}
+				if chatItem.LiveChatPlaceholderItemRenderer.ID != "" {
+					continue
+				}
+				if liveChatTickerItem.LiveChatTickerSponsorItemRenderer.ID != "" {
+					continue
+				}
+				if liveChatTickerItem.LiveChatTickerPaidMessageItemRenderer.ID != "" {
+					continue
+				}
+
+				fmt.Println(c, i, j, continuationAction.ReplayChatItemAction.VideoOffsetTimeMsec)
+				t.Fatal("Should be succeeded")
 			}
-			fmt.Println()
 		}
 	}
 }
