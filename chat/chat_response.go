@@ -64,6 +64,7 @@ type ChatItem struct {
 
 type LiveChatTickerItem struct {
 	LiveChatTickerPaidMessageItemRenderer LiveChatTickerPaidMessageItemRenderer `json:"liveChatTickerPaidMessageItemRenderer"`
+	LiveChatTickerSponsorItemRenderer     LiveChatTickerSponsorItemRenderer     `json:"liveChatTickerSponsorItemRenderer"`
 	DurationSec                           string                                `json:"durationSec"`
 }
 
@@ -89,11 +90,15 @@ type LiveChatTextMessageRenderer struct {
 }
 
 type LiveChatMembershipItemRenderer struct {
-	ID            string        `json:"id"`
-	TimestampUsec string        `json:"timestampUsec"`
-	Icon          Icon          `json:"icon"`
-	Message       Message       `json:"message"`
-	HeaderSubtext HeaderSubtext `json:"headerSubtext"`
+	ID                       string              `json:"id"`
+	TimestampUsec            string              `json:"timestampUsec"`
+	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
+	HeaderSubtext            HeaderSubtext       `json:"headerSubtext"`
+	AuthorName               AuthorName          `json:"authorName"`
+	AuthorPhoto              AuthorPhoto         `json:"authorPhoto"`
+	AuthorBadges             []AuthorBadge       `json:"authorBadges"`
+	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
+	ContextMenuAccessibility Accessibility       `json:"contextMenuAccessibility"`
 }
 
 type LiveChatPaidMessageRenderer struct {
@@ -126,6 +131,27 @@ type LiveChatTickerPaidMessageItemRenderer struct {
 	DurationSec             int              `json:"durationSec"`
 	FullDurationSec         int              `json:"fullDurationSec"`
 	ShowItemEndpoint        ShowItemEndpoint `json:"showItemEndpoint"`
+}
+
+type LiveChatTickerSponsorItemRenderer struct {
+	ID                      string           `json:"id"`
+	DetailText              DetailText       `json:"detailText"`
+	DetailTextColor         int              `json:"detailTextColor"`
+	StartBackgroundColor    int              `json:"startBackgroundColor"`
+	EndBackgroundColor      int              `json:"endBackgroundColor"`
+	SponsorPhoto            SponsorPhoto     `json:"sponsorPhoto"`
+	DurationSec             int              `json:"durationSec"`
+	ShowItemEndpoint        ShowItemEndpoint `json:"showItemEndpoint"`
+	AuthorExternalChannelId string           `json:"authorExternalChannelId"`
+	FullDurationSec         int              `json:"fullDurationSec"`
+}
+
+type DetailText struct {
+	Runs []Run `json:"runs"`
+}
+
+type SponsorPhoto struct {
+	Thumbnails []Thumbnail `json:"thumbnails"`
 }
 
 type Icon struct {
@@ -186,6 +212,7 @@ type LiveChatItemContextMenuEndpoint struct {
 }
 
 type ShowItemEndpoint struct {
+	ClickTrackingParams      string                   `json:"clickTrackingParams"`
 	CommandMetadata          CommandMetadata          `json:"commandMetadata"`
 	ShowLiveChatItemEndpoint ShowLiveChatItemEndpoint `json:"showLiveChatItemEndpoint"`
 }
@@ -195,7 +222,8 @@ type ShowLiveChatItemEndpoint struct {
 }
 
 type Renderer struct {
-	LiveChatPaidMessageRenderer LiveChatPaidMessageRenderer `json:"liveChatPaidMessageRenderer"`
+	LiveChatPaidMessageRenderer    LiveChatPaidMessageRenderer    `json:"liveChatPaidMessageRenderer"`
+	LiveChatMembershipItemRenderer LiveChatMembershipItemRenderer `json:"liveChatMembershipItemRenderer"`
 }
 
 type Accessibility struct {
