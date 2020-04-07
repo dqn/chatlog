@@ -2,33 +2,13 @@ package chatlog
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"net/url"
 	"strings"
 )
 
-const baseURL = "https://www.youtube.com"
-
 type Chatlog struct {
 	VideoId      string
 	Continuation string
-}
-
-func makeVideoPageRequest(videoId string) (*http.Request, error) {
-	req, err := http.NewRequest("GET", baseURL, nil)
-	if err != nil {
-		return nil, err
-	}
-
-	v := &url.Values{}
-	v.Add("v", videoId)
-	req.URL.RawQuery = v.Encode()
-	req.URL.Path = "/watch"
-
-	req.Header.Add("User-Agent", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36")
-
-	return req, nil
 }
 
 func extractContinuation(body []byte) (string, error) {
@@ -48,19 +28,12 @@ func extractContinuation(body []byte) (string, error) {
 }
 
 func New(videoId string) (*Chatlog, error) {
-	req, err := makeVideoPageRequest(videoId)
-	if err != nil {
-		return nil, err
-	}
+	client := newClient()
 
-	client := &http.Client{}
-	resp, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
+	v := &url.Values{}
+	v.Add("v", videoId)
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := client.Get("/watch", v)
 	if err != nil {
 		return nil, err
 	}
