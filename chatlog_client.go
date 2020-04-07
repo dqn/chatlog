@@ -28,7 +28,7 @@ func newClient() *ChatlogClient {
 	return &ChatlogClient{&http.Client{}}
 }
 
-func (c *ChatlogClient) do(req *http.Request) ([]byte, error) {
+func (c *ChatlogClient) Do(req *http.Request) ([]byte, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -44,5 +44,5 @@ func (c *ChatlogClient) Get(path string, values *url.Values) ([]byte, error) {
 	}
 	req.URL.Path = path
 	req.URL.RawQuery = values.Encode()
-	return c.do(req)
+	return c.Do(req)
 }
