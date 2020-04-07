@@ -1,6 +1,7 @@
 package chatlog
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/url"
 	"strings"
@@ -9,6 +10,7 @@ import (
 type Chatlog struct {
 	VideoId      string
 	Continuation string
+	client       *ChatlogClient
 }
 
 func extractContinuation(body []byte) (string, error) {
@@ -23,25 +25,38 @@ func extractContinuation(body []byte) (string, error) {
 	for i := index + len(query); s[i] != byte('"'); i++ {
 		b = append(b, s[i])
 	}
-
 	return string(b), nil
 }
 
 func New(videoId string) (*Chatlog, error) {
 	client := newClient()
-
 	v := &url.Values{}
 	v.Add("v", videoId)
-
 	body, err := client.Get("/watch", v)
 	if err != nil {
 		return nil, err
 	}
-
 	continuation, err := extractContinuation(body)
 	if err != nil {
 		return nil, err
 	}
+	return &Chatlog{videoId, continuation, client}, nil
+}
 
-	return &Chatlog{videoId, continuation}, nil
+func (c *Chatlog) Fecth() (*ChatResponse, error) {
+	v := &url.Values{}
+	v.Add("pbj", "1")
+	v.Add("continuation", c.Continuation)
+
+	body, err := c.client.Get("/live_chat_replay/get_live_chat_replay", v)
+	if err != nil {
+		return nil, err
+	}
+
+	chat := &ChatResponse{}
+	if err := json.Unmarshal(body, chat); err != nil {
+		return nil, err
+	}
+	c.Continuation = chat.Response.ContinuationContents.LiveChatContinuation.Continuations[0].LiveChatReplayContinuationData.Continuation
+	return chat, nil
 }
