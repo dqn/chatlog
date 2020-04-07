@@ -14,8 +14,6 @@ $ go get github.com/dqn/chatlog
 package main
 
 import (
-	"fmt"
-
 	"github.com/dqn/chatlog"
 )
 
@@ -24,24 +22,38 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	resp, err := c.Fecth()
-	if err != nil {
-		panic(err)
-	}
-	for _, continuationAction := range resp {
-		for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
-			if r := chatAction.AddChatItemAction.Item.LiveChatTextMessageRenderer; r.ID != "" {
-				for _, run := range r.Message.Runs {
-					if run.Text != "" {
-						fmt.Println(run.Text)
-					} else if e := run.Emoji; e.EmojiId != "" {
-						fmt.Print(e.Image.Accessibility.AccessibilityData.Label)
-					}
+
+	for c.Continuation != "" {
+		resp, err := c.Fecth()
+		if err != nil {
+			panic(err)
+		}
+		for _, continuationAction := range resp {
+			for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
+				chatItem := chatAction.AddChatItemAction.Item
+				liveChatTickerItem := chatAction.AddLiveChatTickerItemAction.Item
+
+				switch {
+				case chatItem.LiveChatViewerEngagementMessageRenderer.ID != "":
+					// ...
+				case chatItem.LiveChatTextMessageRenderer.ID != "":
+					// ...
+				case chatItem.LiveChatMembershipItemRenderer.ID != "":
+					// ...
+				case chatItem.LiveChatMembershipItemRenderer.ID != "":
+					// ...
+				case chatItem.LiveChatPaidMessageRenderer.ID != "":
+					// ...
+				case chatItem.LiveChatPlaceholderItemRenderer.ID != "":
+					// ...
+				case liveChatTickerItem.LiveChatTickerSponsorItemRenderer.ID != "":
+					// ...
+				case liveChatTickerItem.LiveChatTickerPaidMessageItemRenderer.ID != "":
+					// ...
 				}
 			}
 		}
 	}
-	c.Fecth() // next chats
 }
 ```
 
