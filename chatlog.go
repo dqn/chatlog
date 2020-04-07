@@ -11,7 +11,7 @@ import (
 
 type Chatlog struct {
 	VideoId      string
-	Continuation string
+	continuation string
 	client       *chatlogClient
 }
 
@@ -48,7 +48,7 @@ func New(videoId string) (*Chatlog, error) {
 func (c *Chatlog) Fecth() ([]chat.ContinuationAction, error) {
 	v := &url.Values{}
 	v.Add("pbj", "1")
-	v.Add("continuation", c.Continuation)
+	v.Add("continuation", c.continuation)
 
 	body, err := c.client.Get("/live_chat_replay/get_live_chat_replay", v)
 	if err != nil {
@@ -59,7 +59,7 @@ func (c *Chatlog) Fecth() ([]chat.ContinuationAction, error) {
 	if err := json.Unmarshal(body, chat); err != nil {
 		return nil, err
 	}
-	continuation := chat.Response.ContinuationContents.LiveChatContinuation
-	c.Continuation = continuation.Continuations[0].LiveChatReplayContinuationData.Continuation
-	return continuation.Actions, nil
+	cont := chat.Response.ContinuationContents.LiveChatContinuation
+	c.continuation = cont.Continuations[0].LiveChatReplayContinuationData.Continuation
+	return cont.Actions, nil
 }
