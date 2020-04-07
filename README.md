@@ -41,6 +41,7 @@ func main() {
 			}
 		}
 	}
+	c.Fecth() // next chats
 }
 ```
 
