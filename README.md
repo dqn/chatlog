@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	c, err := chatlog.New("RVP-epwlIAk")
+	c, err := chatlog.New("VIDEO_ID")
 	if err != nil {
 		panic(err)
 	}
@@ -30,11 +30,11 @@ func main() {
 	}
 	for _, continuationAction := range resp {
 		for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
-			if l := chatAction.AddChatItemAction.Item.LiveChatTextMessageRenderer; &l != nil {
-				for _, run := range l.Message.Runs {
+			if r := chatAction.AddChatItemAction.Item.LiveChatTextMessageRenderer; r.ID != "" {
+				for _, run := range r.Message.Runs {
 					if run.Text != "" {
 						fmt.Println(run.Text)
-					} else if e := run.Emoji; &e != nil {
+					} else if e := run.Emoji; e.EmojiId != "" {
 						fmt.Print(e.Image.Accessibility.AccessibilityData.Label)
 					}
 				}
