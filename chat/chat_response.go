@@ -5,7 +5,19 @@ type ChatResponse struct {
 }
 
 type Response struct {
+	ResponseContext      ResponseContext      `json:"responseContext"`
 	ContinuationContents ContinuationContents `json:"continuationContents"`
+}
+
+type ResponseContext struct {
+	Errors struct{ Error []Error } `json:"errors"`
+}
+
+type Error struct {
+	Domain               string `json:"domain"`
+	Code                 string `json:"code"`
+	DebugInfo            string `json:"debugInfo"`
+	ExternalErrorMessage string `json:"externalErrorMessage"`
 }
 
 type ContinuationContents struct {
@@ -79,15 +91,15 @@ type LiveChatViewerEngagementMessageRenderer struct {
 type LiveChatTextMessageRenderer struct {
 	ID                       string              `json:"id"`
 	TimestampUsec            string              `json:"timestampUsec"`
-	Icon                     Icon                `json:"icon"`
 	Message                  Message             `json:"message"`
 	AuthorName               AuthorName          `json:"authorName"`
 	AuthorPhoto              AuthorPhoto         `json:"authorPhoto"`
+	Icon                     Icon                `json:"icon"`
 	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
+	AuthorBadges             []AuthorBadge       `json:"authorBadges"`
 	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
 	ContextMenuAccessibility Accessibility       `json:"contextMenuAccessibility"`
 	TimestampText            TimestampText       `json:"timestampText"`
-	AuthorBadges             []AuthorBadge       `json:"authorBadges"`
 }
 
 type LiveChatMembershipItemRenderer struct {
@@ -105,20 +117,21 @@ type LiveChatMembershipItemRenderer struct {
 type LiveChatPaidMessageRenderer struct {
 	ID                       string              `json:"id"`
 	TimestampUsec            string              `json:"timestampUsec"`
-	Message                  Message             `json:"message"`
 	AuthorName               AuthorName          `json:"authorName"`
 	AuthorPhoto              AuthorPhoto         `json:"authorPhoto"`
 	PurchaseAmountText       PurchaseAmountText  `json:"purchaseAmountText"`
-	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
-	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
-	ContextMenuAccessibility Accessibility       `json:"contextMenuAccessibility"`
-	TimestampText            TimestampText       `json:"timestampText"`
-	TimestampColor           int                 `json:"timestampColor"`
-	AuthorNameTextColor      int                 `json:"authorNameTextColor"`
+	Message                  Message             `json:"message"`
 	HeaderBackgroundColor    int                 `json:"headerBackgroundColor"`
 	HeaderTextColor          int                 `json:"headerTextColor"`
 	BodyBackgroundColor      int                 `json:"bodyBackgroundColor"`
 	BodyTextColor            int                 `json:"bodyTextColor"`
+	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
+	AuthorNameTextColor      int                 `json:"authorNameTextColor"`
+	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
+	TimestampColor           int                 `json:"timestampColor"`
+	ContextMenuAccessibility Accessibility       `json:"contextMenuAccessibility"`
+	TimestampText            TimestampText       `json:"timestampText"`
+	TrackingParams           string              `json:"trackingParams"`
 }
 
 type LiveChatPlaceholderItemRenderer struct {
@@ -133,10 +146,11 @@ type LiveChatTickerPaidMessageItemRenderer struct {
 	StartBackgroundColor    int              `json:"startBackgroundColor"`
 	EndBackgroundColor      int              `json:"endBackgroundColor"`
 	AuthorPhoto             AuthorPhoto      `json:"authorPhoto"`
-	AuthorExternalChannelId string           `json:"authorExternalChannelId"`
 	DurationSec             int              `json:"durationSec"`
-	FullDurationSec         int              `json:"fullDurationSec"`
 	ShowItemEndpoint        ShowItemEndpoint `json:"showItemEndpoint"`
+	AuthorExternalChannelId string           `json:"authorExternalChannelId"`
+	FullDurationSec         int              `json:"fullDurationSec"`
+	TrackingParams          string           `json:"trackingParams"`
 }
 
 type LiveChatTickerSponsorItemRenderer struct {

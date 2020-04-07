@@ -13,9 +13,10 @@ func TestNew(t *testing.T) {
 }
 
 func TestFetch(t *testing.T) {
-	chatlog, _ := New("fzd9nzDpjh0")
+	chatlog, _ := New("wEPuZFo1qNc")
+	c := 0
 
-	for c := 0; c < 100; c++ {
+	for chatlog.Continuation != "" {
 		resp, err := chatlog.Fecth()
 		if err != nil {
 			t.Fatal("Should be succeeded", err)
@@ -53,5 +54,6 @@ func TestFetch(t *testing.T) {
 				t.Fatal("Should be succeeded")
 			}
 		}
+		c++
 	}
 }
