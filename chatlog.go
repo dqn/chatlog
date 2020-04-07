@@ -62,16 +62,7 @@ func (c *Chatlog) Fecth() ([]chat.ContinuationAction, error) {
 	if errors := chat.Response.ResponseContext.Errors.Error; errors != nil {
 		return nil, fmt.Errorf("an error occurred: %v", errors[0].DebugInfo)
 	}
-	continuation := ""
-	for _, v := range chat.Response.ContinuationContents.LiveChatContinuation.Continuations {
-		if cont := v.LiveChatReplayContinuationData.Continuation; cont != "" {
-			continuation = cont
-			break
-		} else if cont := v.PlayerSeekContinuationData.Continuation; cont != "" {
-			continuation = cont
-			break
-		}
-	}
-	c.Continuation = continuation
-	return chat.Response.ContinuationContents.LiveChatContinuation.Actions, nil
+	cont := chat.Response.ContinuationContents.LiveChatContinuation
+	c.Continuation = cont.Continuations[0].LiveChatReplayContinuationData.Continuation
+	return cont.Actions, nil
 }
