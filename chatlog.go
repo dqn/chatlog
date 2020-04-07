@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"net/url"
 	"strings"
+
+	"github.com/dqn/chatlog/chat"
 )
 
 type Chatlog struct {
 	VideoId      string
 	Continuation string
-	client       *ChatlogClient
+	client       *chatlogClient
 }
 
 func extractContinuation(body []byte) (string, error) {
@@ -43,7 +45,7 @@ func New(videoId string) (*Chatlog, error) {
 	return &Chatlog{videoId, continuation, client}, nil
 }
 
-func (c *Chatlog) Fecth() (*ChatResponse, error) {
+func (c *Chatlog) Fecth() ([]chat.ContinuationAction, error) {
 	v := &url.Values{}
 	v.Add("pbj", "1")
 	v.Add("continuation", c.Continuation)
@@ -53,10 +55,11 @@ func (c *Chatlog) Fecth() (*ChatResponse, error) {
 		return nil, err
 	}
 
-	chat := &ChatResponse{}
+	chat := &chat.ChatResponse{}
 	if err := json.Unmarshal(body, chat); err != nil {
 		return nil, err
 	}
-	c.Continuation = chat.Response.ContinuationContents.LiveChatContinuation.Continuations[0].LiveChatReplayContinuationData.Continuation
-	return chat, nil
+	continuation := chat.Response.ContinuationContents.LiveChatContinuation
+	c.Continuation = continuation.Continuations[0].LiveChatReplayContinuationData.Continuation
+	return continuation.Actions, nil
 }

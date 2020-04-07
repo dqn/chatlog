@@ -11,7 +11,7 @@ const (
 	userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
 )
 
-type ChatlogClient struct {
+type chatlogClient struct {
 	httpClient *http.Client
 }
 
@@ -24,11 +24,11 @@ func newDefaultRequest(method string) (*http.Request, error) {
 	return req, nil
 }
 
-func newClient() *ChatlogClient {
-	return &ChatlogClient{&http.Client{}}
+func newClient() *chatlogClient {
+	return &chatlogClient{&http.Client{}}
 }
 
-func (c *ChatlogClient) Do(req *http.Request) ([]byte, error) {
+func (c *chatlogClient) Do(req *http.Request) ([]byte, error) {
 	resp, err := c.httpClient.Do(req)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,7 @@ func (c *ChatlogClient) Do(req *http.Request) ([]byte, error) {
 	return ioutil.ReadAll(resp.Body)
 }
 
-func (c *ChatlogClient) Get(path string, values *url.Values) ([]byte, error) {
+func (c *chatlogClient) Get(path string, values *url.Values) ([]byte, error) {
 	req, err := newDefaultRequest("GET")
 	if err != nil {
 		return nil, err

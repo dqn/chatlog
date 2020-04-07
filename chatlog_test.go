@@ -16,20 +16,20 @@ func TestNew(t *testing.T) {
 
 func TestFetch(t *testing.T) {
 	chatlog, _ := New("fzd9nzDpjh0")
-	c, err := chatlog.Fecth()
+	resp, err := chatlog.Fecth()
 	if err != nil {
 		t.Fatal("Should be succeeded", err)
 	}
 
-	for _, v := range c.Response.ContinuationContents.LiveChatContinuation.Actions {
-		for _, w := range v.ReplayChatItemAction.Actions {
-			l := w.AddChatItemAction.Item.LiveChatTextMessageRenderer
+	for _, continuationAction := range resp {
+		for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
+			l := chatAction.AddChatItemAction.Item.LiveChatTextMessageRenderer
 			fmt.Printf("%s %s: ", l.TimestampText.SimpleText, l.AuthorName.SimpleText)
-			for _, x := range l.Message.Runs {
-				if x.Text != "" {
-					fmt.Print(x.Text)
-				} else {
-					fmt.Print(x.Emoji.Shortcuts[0])
+			for _, run := range l.Message.Runs {
+				if run.Text != "" {
+					fmt.Print(run.Text)
+				} else if s := run.Emoji.Shortcuts[0]; s != "" {
+					fmt.Print(s)
 				}
 			}
 			fmt.Println()

@@ -1,4 +1,4 @@
-package chatlog
+package chat
 
 type ChatResponse struct {
 	Response Response `json:"response"`
