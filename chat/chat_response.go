@@ -276,6 +276,7 @@ type AuthorBadge struct {
 }
 
 type LiveChatAuthorBadgeRenderer struct {
+	Icon            Icon            `json:"icon"`
 	CustomThumbnail CustomThumbnail `json:"customThumbnail"`
 	Tooltip         string          `json:"tooltip"`
 	Accessibility   Accessibility   `json:"accessibility"`
