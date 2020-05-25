@@ -10,7 +10,7 @@ import (
 )
 
 type Chatlog struct {
-	VideoId      string
+	VideoID      string
 	Continuation string
 	client       *chatlogClient
 }
@@ -30,10 +30,10 @@ func extractContinuation(body []byte) (string, error) {
 	return string(b), nil
 }
 
-func New(videoId string) (*Chatlog, error) {
+func New(videoID string) (*Chatlog, error) {
 	client := newClient()
 	v := &url.Values{}
-	v.Add("v", videoId)
+	v.Add("v", videoID)
 	body, err := client.Get("/watch", v)
 	if err != nil {
 		return nil, err
@@ -42,7 +42,7 @@ func New(videoId string) (*Chatlog, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &Chatlog{videoId, continuation, client}, nil
+	return &Chatlog{videoID, continuation, client}, nil
 }
 
 func (c *Chatlog) Fecth() ([]chat.ContinuationAction, error) {

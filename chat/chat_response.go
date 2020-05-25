@@ -59,7 +59,7 @@ type ChatAction struct {
 
 type AddChatItemAction struct {
 	Item     ChatItem `json:"item"`
-	ClientId string   `json:"clientId"`
+	ClientID string   `json:"clientId"`
 }
 
 type AddLiveChatTickerItemAction struct {
@@ -97,7 +97,7 @@ type LiveChatTextMessageRenderer struct {
 	Icon                     Icon                `json:"icon"`
 	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
 	AuthorBadges             []AuthorBadge       `json:"authorBadges"`
-	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
+	AuthorExternalChannelID  string              `json:"authorExternalChannelId"`
 	ContextMenuAccessibility Accessibility       `json:"contextMenuAccessibility"`
 	TimestampText            TimestampText       `json:"timestampText"`
 }
@@ -105,7 +105,7 @@ type LiveChatTextMessageRenderer struct {
 type LiveChatMembershipItemRenderer struct {
 	ID                       string              `json:"id"`
 	TimestampUsec            string              `json:"timestampUsec"`
-	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
+	AuthorExternalChannelID  string              `json:"authorExternalChannelId"`
 	HeaderSubtext            HeaderSubtext       `json:"headerSubtext"`
 	AuthorName               AuthorName          `json:"authorName"`
 	AuthorPhoto              AuthorPhoto         `json:"authorPhoto"`
@@ -125,7 +125,7 @@ type LiveChatPaidMessageRenderer struct {
 	HeaderTextColor          int                 `json:"headerTextColor"`
 	BodyBackgroundColor      int                 `json:"bodyBackgroundColor"`
 	BodyTextColor            int                 `json:"bodyTextColor"`
-	AuthorExternalChannelId  string              `json:"authorExternalChannelId"`
+	AuthorExternalChannelID  string              `json:"authorExternalChannelId"`
 	AuthorNameTextColor      int                 `json:"authorNameTextColor"`
 	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
 	TimestampColor           int                 `json:"timestampColor"`
@@ -148,7 +148,7 @@ type LiveChatTickerPaidMessageItemRenderer struct {
 	AuthorPhoto             AuthorPhoto      `json:"authorPhoto"`
 	DurationSec             int              `json:"durationSec"`
 	ShowItemEndpoint        ShowItemEndpoint `json:"showItemEndpoint"`
-	AuthorExternalChannelId string           `json:"authorExternalChannelId"`
+	AuthorExternalChannelID string           `json:"authorExternalChannelId"`
 	FullDurationSec         int              `json:"fullDurationSec"`
 	TrackingParams          string           `json:"trackingParams"`
 }
@@ -162,7 +162,7 @@ type LiveChatTickerSponsorItemRenderer struct {
 	SponsorPhoto            SponsorPhoto     `json:"sponsorPhoto"`
 	DurationSec             int              `json:"durationSec"`
 	ShowItemEndpoint        ShowItemEndpoint `json:"showItemEndpoint"`
-	AuthorExternalChannelId string           `json:"authorExternalChannelId"`
+	AuthorExternalChannelID string           `json:"authorExternalChannelId"`
 	FullDurationSec         int              `json:"fullDurationSec"`
 }
 
@@ -259,7 +259,7 @@ type TimestampText struct {
 }
 
 type Emoji struct {
-	EmojiId       string   `json:"emojiId"`
+	EmojiID       string   `json:"emojiId"`
 	Shortcuts     []string `json:"shortcuts"`
 	SearchTerms   []string `json:"searchTerms"`
 	Image         Image    `json:"image"`
