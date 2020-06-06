@@ -101,3 +101,20 @@ func TestFetch(t *testing.T) {
 		}
 	}
 }
+
+func TestHandleChatItem(t *testing.T) {
+	c := New(os.Getenv("VIDEO_ID"))
+	err := c.HandleChatItem(func(item *ChatItem) error {
+		switch {
+		case item.LiveChatTextMessageRenderer.ID != "":
+			r := item.LiveChatTextMessageRenderer
+			println(r.AuthorName.SimpleText)
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		t.Fatal(err)
+	}
+}

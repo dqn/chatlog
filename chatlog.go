@@ -76,6 +76,31 @@ func (c *Chatlog) FecthChats(continuation string) (*FetchResult, error) {
 	return &r, nil
 }
 
+func (c *Chatlog) HandleChatItem(handler func(item *ChatItem) error) error {
+	cont, err := c.GetInitialContinuation()
+	if err != nil {
+		return err
+	}
+
+	for cont != "" {
+		r, err := c.FecthChats(cont)
+		if err != nil {
+			return err
+		}
+		cont = r.Continuation
+
+		for _, continuationAction := range r.Action {
+			for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
+				if err = handler(&chatAction.AddChatItemAction.Item); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
 func (c *Chatlog) fetch(path string, values *url.Values) ([]byte, error) {
 	req, err := http.NewRequest("GET", baseURL, nil)
 	if err != nil {
