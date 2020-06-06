@@ -1,6 +1,6 @@
 # chatlog
 
-Fetch YouTube Live archive chats
+Fetch chats from YouTube Live archive.
 
 ## Installation
 
@@ -18,17 +18,59 @@ import (
 )
 
 func main() {
-	c, err := chatlog.New("VIDEO_ID")
+	c := chatlog.New("VIDEO_ID")
+
+	// handle simply
+	err := c.HandleChatItem(func(item *chatlog.ChatItem) error {
+		switch {
+		case item.LiveChatViewerEngagementMessageRenderer.ID != "":
+			// ...
+		case item.LiveChatTextMessageRenderer.ID != "":
+			// ...
+		case item.LiveChatMembershipItemRenderer.ID != "":
+			// ...
+		case item.LiveChatMembershipItemRenderer.ID != "":
+			// ...
+		case item.LiveChatPaidMessageRenderer.ID != "":
+			// ...
+		case item.LiveChatPlaceholderItemRenderer.ID != "":
+			// ...
+		}
+
+		return nil
+	})
+
 	if err != nil {
-		panic(err)
+		// handle error
+	}
+}
+```
+
+Also, can handle manually.
+
+```go
+package main
+
+import (
+	"github.com/dqn/chatlog"
+)
+
+func main() {
+	c := chatlog.New("VIDEO_ID")
+
+	cont, err := c.GetInitialContinuation()
+	if err != nil {
+		// handle error
 	}
 
-	for c.Continuation != "" {
-		resp, err := c.Fecth()
+	for cont != "" {
+		r, err := c.FecthChats(cont)
 		if err != nil {
-			panic(err)
+			// handle error
 		}
-		for _, continuationAction := range resp {
+		cont = r.Continuation
+
+		for _, continuationAction := range r.Action {
 			for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
 				chatItem := chatAction.AddChatItemAction.Item
 				liveChatTickerItem := chatAction.AddLiveChatTickerItemAction.Item
@@ -59,7 +101,7 @@ func main() {
 
 ## More details
 
-See [chat/chat_response.go](chat/chat_response.go)
+See [payload.go](payload.go)
 
 ## License
 
