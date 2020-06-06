@@ -2,25 +2,27 @@ package chatlog
 
 import (
 	"fmt"
+	"os"
 	"testing"
 )
 
 func TestNew(t *testing.T) {
-	_, err := New("fzd9nzDpjh0")
+	_, err := New(os.Getenv("VIDEO_ID"))
 	if err != nil {
-		t.Fatal("Should be succeeded", err)
+		t.Fatal(err)
 	}
 }
 
 func TestFetch(t *testing.T) {
-	chatlog, _ := New("wEPuZFo1qNc")
+	chatlog, _ := New(os.Getenv("VIDEO_ID"))
 	c := 0
 
-	for chatlog.Continuation != "" {
+	for chatlog.continuation != "" {
 		resp, err := chatlog.Fecth()
 		if err != nil {
-			t.Fatal("Should be succeeded", err)
+			t.Fatal(err)
 		}
+
 		for i, continuationAction := range resp {
 			for j, chatAction := range continuationAction.ReplayChatItemAction.Actions {
 				chatItem := chatAction.AddChatItemAction.Item
@@ -28,6 +30,7 @@ func TestFetch(t *testing.T) {
 				switch {
 				case chatItem.LiveChatViewerEngagementMessageRenderer.ID != "":
 					continue
+
 				case chatItem.LiveChatTextMessageRenderer.ID != "":
 					r := chatItem.LiveChatTextMessageRenderer
 					m := ""
@@ -39,6 +42,7 @@ func TestFetch(t *testing.T) {
 						}
 					}
 					fmt.Printf("%6s [%s]: %s\n", r.TimestampText.SimpleText, r.AuthorName.SimpleText, m)
+
 				case chatItem.LiveChatMembershipItemRenderer.ID != "":
 					r := chatItem.LiveChatMembershipItemRenderer
 					m := ""
@@ -46,6 +50,7 @@ func TestFetch(t *testing.T) {
 						m += v.Text
 					}
 					fmt.Printf("       [%s]: %s\n", r.AuthorName.SimpleText, m)
+
 				case chatItem.LiveChatPaidMessageRenderer.ID != "":
 					r := chatItem.LiveChatPaidMessageRenderer
 					m := ""
@@ -57,8 +62,10 @@ func TestFetch(t *testing.T) {
 						}
 					}
 					fmt.Printf("%6s [%s]: <%s> %s\n", r.TimestampText.SimpleText, r.AuthorName.SimpleText, r.PurchaseAmountText.SimpleText, m)
+
 				case chatItem.LiveChatPlaceholderItemRenderer.ID != "":
 					continue
+
 				case liveChatTickerItem.LiveChatTickerSponsorItemRenderer.ID != "":
 					r := liveChatTickerItem.LiveChatTickerSponsorItemRenderer
 					rr := r.ShowItemEndpoint.ShowLiveChatItemEndpoint.Renderer.LiveChatMembershipItemRenderer
@@ -67,6 +74,7 @@ func TestFetch(t *testing.T) {
 						m += v.Text
 					}
 					fmt.Printf("       [%s]: %s\n", rr.AuthorName.SimpleText, m)
+
 				case liveChatTickerItem.LiveChatTickerPaidMessageItemRenderer.ID != "":
 					r := liveChatTickerItem.LiveChatTickerPaidMessageItemRenderer
 					rr := r.ShowItemEndpoint.ShowLiveChatItemEndpoint.Renderer.LiveChatPaidMessageRenderer
@@ -79,6 +87,7 @@ func TestFetch(t *testing.T) {
 						}
 					}
 					fmt.Printf("%6s [%s]: <%s> %s\n", rr.TimestampText.SimpleText, rr.AuthorName.SimpleText, rr.PurchaseAmountText.SimpleText, m)
+
 				default:
 					fmt.Println(c, i, j, continuationAction.ReplayChatItemAction.VideoOffsetTimeMsec)
 					t.Fatal("Should be succeeded")
