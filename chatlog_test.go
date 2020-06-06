@@ -6,24 +6,29 @@ import (
 	"testing"
 )
 
-func TestNew(t *testing.T) {
-	_, err := New(os.Getenv("VIDEO_ID"))
+func TestGetInitialContinuation(t *testing.T) {
+	c := New(os.Getenv("VIDEO_ID"))
+	_, err := c.GetInitialContinuation()
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestFetch(t *testing.T) {
-	chatlog, _ := New(os.Getenv("VIDEO_ID"))
-	c := 0
+	c := New(os.Getenv("VIDEO_ID"))
+	cont, err := c.GetInitialContinuation()
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	for chatlog.continuation != "" {
-		resp, err := chatlog.Fecth()
+	for cont != "" {
+		r, err := c.FecthChats(cont)
 		if err != nil {
 			t.Fatal(err)
 		}
+		cont = r.Continuation
 
-		for i, continuationAction := range resp {
+		for i, continuationAction := range r.Action {
 			for j, chatAction := range continuationAction.ReplayChatItemAction.Actions {
 				chatItem := chatAction.AddChatItemAction.Item
 				liveChatTickerItem := chatAction.AddLiveChatTickerItemAction.Item
@@ -94,6 +99,5 @@ func TestFetch(t *testing.T) {
 				}
 			}
 		}
-		c++
 	}
 }

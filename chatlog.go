@@ -3,32 +3,96 @@ package chatlog
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"net/http"
 	"net/url"
 	"strings"
 )
 
+const (
+	baseURL   = "https://www.youtube.com"
+	userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36"
+)
+
 type Chatlog struct {
-	videoID      string
-	continuation string
-	client       *chatlogClient
+	videoID string
+	client  *http.Client
 }
 
-func New(videoID string) (*Chatlog, error) {
-	client := newClient()
-	var v url.Values
-	v.Add("v", videoID)
+type FetchResult struct {
+	Action       []ContinuationAction
+	Continuation string
+}
 
-	body, err := client.Get("/watch", &v)
+func New(videoID string) *Chatlog {
+	return &Chatlog{
+		videoID: videoID,
+		client:  &http.Client{},
+	}
+}
+
+func (c *Chatlog) GetInitialContinuation() (string, error) {
+	v := url.Values{"v": {c.videoID}}
+	body, err := c.fetch("/watch", &v)
+	if err != nil {
+		return "", err
+	}
+
+	cont, err := retrieveContinuation(body)
+	if err != nil {
+		return "", err
+	}
+
+	return cont, nil
+}
+
+func (c *Chatlog) FecthChats(continuation string) (*FetchResult, error) {
+	v := &url.Values{
+		"pbj":          {"1"},
+		"continuation": {continuation},
+	}
+
+	body, err := c.fetch("/live_chat_replay/get_live_chat_replay", v)
 	if err != nil {
 		return nil, err
 	}
 
-	continuation, err := retrieveContinuation(body)
+	var chat ChatResponse
+	if err := json.Unmarshal(body, &chat); err != nil {
+		return nil, err
+	}
+
+	if errors := chat.Response.ResponseContext.Errors.Error; errors != nil {
+		err = fmt.Errorf(errors[0].ExternalErrorMessage)
+		return nil, err
+	}
+
+	cont := chat.Response.ContinuationContents.LiveChatContinuation
+	r := FetchResult{
+		Action:       cont.Actions,
+		Continuation: cont.Continuations[0].LiveChatReplayContinuationData.Continuation,
+	}
+
+	return &r, nil
+}
+
+func (c *Chatlog) fetch(path string, values *url.Values) ([]byte, error) {
+	req, err := http.NewRequest("GET", baseURL, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return &Chatlog{videoID, continuation, client}, nil
+	req.Header.Set("User-Agent", userAgent)
+	req.URL.Path = path
+	req.URL.RawQuery = values.Encode()
+
+	resp, err := c.client.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	return ioutil.ReadAll(resp.Body)
 }
 
 func retrieveContinuation(body []byte) (string, error) {
@@ -46,31 +110,4 @@ func retrieveContinuation(body []byte) (string, error) {
 	}
 
 	return string(b), nil
-}
-
-func (c *Chatlog) Fecth() ([]ContinuationAction, error) {
-	v := &url.Values{
-		"pbj":          {"1"},
-		"continuation": {c.continuation},
-	}
-
-	body, err := c.client.Get("/live_chat_replay/get_live_chat_replay", v)
-	if err != nil {
-		return nil, err
-	}
-
-	var chat ChatResponse
-	if err := json.Unmarshal(body, &chat); err != nil {
-		return nil, err
-	}
-
-	if errors := chat.Response.ResponseContext.Errors.Error; errors != nil {
-		err = fmt.Errorf("an error occurred: %v", errors[0].DebugInfo)
-		return nil, err
-	}
-
-	cont := chat.Response.ContinuationContents.LiveChatContinuation
-	c.continuation = cont.Continuations[0].LiveChatReplayContinuationData.Continuation
-
-	return cont.Actions, nil
 }
