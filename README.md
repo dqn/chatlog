@@ -1,6 +1,6 @@
 # chatlog
 
-Fetch chats from YouTube Live archive.
+YouTube Live archive chats fecher. Premiered videos are also supported.
 
 ## Installation
 
@@ -14,94 +14,70 @@ $ go get github.com/dqn/chatlog
 package main
 
 import (
-	"github.com/dqn/chatlog"
+  "fmt"
+
+  "github.com/dqn/chatlog"
 )
 
 func main() {
-	c := chatlog.New("VIDEO_ID")
+  c := chatlog.New("VIDEO_ID")
 
-	// handle simply
-	err := c.HandleChatItem(func(item *chatlog.ChatItem) error {
-		switch {
-		case item.LiveChatViewerEngagementMessageRenderer.ID != "":
-			// ...
-		case item.LiveChatTextMessageRenderer.ID != "":
-			// ...
-		case item.LiveChatMembershipItemRenderer.ID != "":
-			// ...
-		case item.LiveChatMembershipItemRenderer.ID != "":
-			// ...
-		case item.LiveChatPaidMessageRenderer.ID != "":
-			// ...
-		case item.LiveChatPlaceholderItemRenderer.ID != "":
-			// ...
-		}
+  err := c.HandleChat(func(renderer ChatRenderer) error {
+    switch renderer.(type) {
+    case *LiveChatViewerEngagementMessageRenderer:
+      fmt.Println(renderer.ChatMessage())
+      // e.g. "[Live chat replay is on. Messages that appeared when the stream was live will show up here.]"
+      return nil
 
-		return nil
-	})
+    case *LiveChatTextMessageRenderer:
+      fmt.Println(renderer.ChatMessage())
+      // e.g. "Alice: hello!"
+      return nil
 
-	if err != nil {
-		// handle error
-	}
+    case *LiveChatMembershipItemRenderer:
+      fmt.Println(renderer.ChatMessage())
+      // e.g. "[Welcome to Membership!] Bob"
+      return nil
+
+    case *LiveChatPaidMessageRenderer:
+      fmt.Println(renderer.ChatMessage())
+      // e.g. "[$10.00] Carol: bye!"
+      return nil
+
+    case *LiveChatPlaceholderItemRenderer:
+      fmt.Println(renderer.ChatMessage())
+      // (empty)
+      return nil
+    }
+  })
+
+  if err != nil {
+    // Handle error.
+  }
 }
 ```
 
-Also, can handle manually.
+Also can custom message.
 
 ```go
-package main
+var buf bytes.Buffer
 
-import (
-	"github.com/dqn/chatlog"
-)
+buf.WriteString(renderer.AuthorName.SimpleText + "> ")
 
-func main() {
-	c := chatlog.New("VIDEO_ID")
-
-	cont, err := c.GetInitialContinuation()
-	if err != nil {
-		// handle error
-	}
-
-	for cont != "" {
-		r, err := c.FecthChats(cont)
-		if err != nil {
-			// handle error
-		}
-		cont = r.Continuation
-
-		for _, continuationAction := range r.Action {
-			for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
-				chatItem := chatAction.AddChatItemAction.Item
-				liveChatTickerItem := chatAction.AddLiveChatTickerItemAction.Item
-
-				switch {
-				case chatItem.LiveChatViewerEngagementMessageRenderer.ID != "":
-					// ...
-				case chatItem.LiveChatTextMessageRenderer.ID != "":
-					// ...
-				case chatItem.LiveChatMembershipItemRenderer.ID != "":
-					// ...
-				case chatItem.LiveChatMembershipItemRenderer.ID != "":
-					// ...
-				case chatItem.LiveChatPaidMessageRenderer.ID != "":
-					// ...
-				case chatItem.LiveChatPlaceholderItemRenderer.ID != "":
-					// ...
-				case liveChatTickerItem.LiveChatTickerSponsorItemRenderer.ID != "":
-					// ...
-				case liveChatTickerItem.LiveChatTickerPaidMessageItemRenderer.ID != "":
-					// ...
-				}
-			}
-		}
-	}
+for _, run := range renderer.Message.Runs {
+  if run.Text != "" {
+    buf.WriteString(run.Text)
+  } else {
+    buf.WriteString(run.Emoji.Image.Accessibility.AccessibilityData.Label)
+  }
 }
+
+fmt.Println(buf.String())
 ```
 
-## More details
+## Other
 
-See [payload.go](payload.go)
+`ChatRenderer` is actual YouTube private API response structure. See payloads for more details.
 
 ## License
 
