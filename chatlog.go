@@ -19,7 +19,7 @@ type Chatlog struct {
 	client  *http.Client
 }
 
-type FetchResult struct {
+type chatsResult struct {
 	Action       []ContinuationAction
 	Continuation string
 }
@@ -28,59 +28,14 @@ func New(videoID string) *Chatlog {
 	return &Chatlog{videoID, &http.Client{}}
 }
 
-func (c *Chatlog) GetInitialContinuation() (string, error) {
-	v := url.Values{"v": {c.videoID}}
-	body, err := c.fetch("/watch", &v)
-	if err != nil {
-		return "", err
-	}
-
-	cont, err := retrieveContinuation(body)
-	if err != nil {
-		return "", err
-	}
-
-	return cont, nil
-}
-
-func (c *Chatlog) FecthChats(continuation string) (*FetchResult, error) {
-	v := &url.Values{
-		"pbj":          {"1"},
-		"continuation": {continuation},
-	}
-
-	body, err := c.fetch("/live_chat_replay/get_live_chat_replay", v)
-	if err != nil {
-		return nil, err
-	}
-
-	var chat ChatResponse
-	if err := json.Unmarshal(body, &chat); err != nil {
-		return nil, err
-	}
-
-	if errors := chat.Response.ResponseContext.Errors.Error; errors != nil {
-		err = fmt.Errorf(errors[0].ExternalErrorMessage)
-		return nil, err
-	}
-
-	cont := chat.Response.ContinuationContents.LiveChatContinuation
-	r := FetchResult{
-		Action:       cont.Actions,
-		Continuation: cont.Continuations[0].LiveChatReplayContinuationData.Continuation,
-	}
-
-	return &r, nil
-}
-
 func (c *Chatlog) HandleChatItem(handler func(item *ChatItem) error) error {
-	cont, err := c.GetInitialContinuation()
+	cont, err := c.getInitialContinuation()
 	if err != nil {
 		return err
 	}
 
 	for cont != "" {
-		r, err := c.FecthChats(cont)
+		r, err := c.fecthChats(cont)
 		if err != nil {
 			return err
 		}
@@ -132,4 +87,49 @@ func retrieveContinuation(body []byte) (string, error) {
 	}
 
 	return string(b), nil
+}
+
+func (c *Chatlog) getInitialContinuation() (string, error) {
+	v := url.Values{"v": {c.videoID}}
+	body, err := c.fetch("/watch", &v)
+	if err != nil {
+		return "", err
+	}
+
+	cont, err := retrieveContinuation(body)
+	if err != nil {
+		return "", err
+	}
+
+	return cont, nil
+}
+
+func (c *Chatlog) fecthChats(continuation string) (*chatsResult, error) {
+	v := &url.Values{
+		"pbj":          {"1"},
+		"continuation": {continuation},
+	}
+
+	body, err := c.fetch("/live_chat_replay/get_live_chat_replay", v)
+	if err != nil {
+		return nil, err
+	}
+
+	var chat ChatResponse
+	if err := json.Unmarshal(body, &chat); err != nil {
+		return nil, err
+	}
+
+	if errors := chat.Response.ResponseContext.Errors.Error; errors != nil {
+		err = fmt.Errorf(errors[0].ExternalErrorMessage)
+		return nil, err
+	}
+
+	cont := chat.Response.ContinuationContents.LiveChatContinuation
+	r := chatsResult{
+		Action:       cont.Actions,
+		Continuation: cont.Continuations[0].LiveChatReplayContinuationData.Continuation,
+	}
+
+	return &r, nil
 }
