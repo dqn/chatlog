@@ -28,22 +28,26 @@ func New(videoID string) *Chatlog {
 	return &Chatlog{videoID, &http.Client{}}
 }
 
-func (c *Chatlog) HandleChatItem(handler func(item *ChatItem) error) error {
+func (c *Chatlog) HandleChat(handler func(renderer ChatRenderer) error) error {
 	cont, err := c.getInitialContinuation()
 	if err != nil {
 		return err
 	}
 
 	for cont != "" {
-		r, err := c.fecthChats(cont)
+		result, err := c.fecthChats(cont)
 		if err != nil {
 			return err
 		}
-		cont = r.Continuation
+		cont = result.Continuation
 
-		for _, continuationAction := range r.Action {
+		for _, continuationAction := range result.Action {
 			for _, chatAction := range continuationAction.ReplayChatItemAction.Actions {
-				if err = handler(&chatAction.AddChatItemAction.Item); err != nil {
+				r := selectChatRenderer(&chatAction.AddChatItemAction.Item)
+				if r == nil {
+					continue
+				}
+				if err = handler(r); err != nil {
 					return err
 				}
 			}
@@ -51,6 +55,28 @@ func (c *Chatlog) HandleChatItem(handler func(item *ChatItem) error) error {
 	}
 
 	return nil
+}
+
+func selectChatRenderer(chatItem *ChatItem) ChatRenderer {
+	switch {
+	case chatItem.LiveChatViewerEngagementMessageRenderer.ID != "":
+		return &chatItem.LiveChatViewerEngagementMessageRenderer
+
+	case chatItem.LiveChatTextMessageRenderer.ID != "":
+		return &chatItem.LiveChatTextMessageRenderer
+
+	case chatItem.LiveChatMembershipItemRenderer.ID != "":
+		return &chatItem.LiveChatMembershipItemRenderer
+
+	case chatItem.LiveChatPaidMessageRenderer.ID != "":
+		return &chatItem.LiveChatPaidMessageRenderer
+
+	case chatItem.LiveChatPlaceholderItemRenderer.ID != "":
+		return &chatItem.LiveChatPlaceholderItemRenderer
+
+	default:
+		return nil
+	}
 }
 
 func (c *Chatlog) fetch(path string, values *url.Values) ([]byte, error) {

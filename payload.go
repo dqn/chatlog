@@ -1,5 +1,9 @@
 package chatlog
 
+import (
+	"bytes"
+)
+
 type ChatResponse struct {
 	Response Response `json:"response"`
 }
@@ -67,6 +71,10 @@ type AddLiveChatTickerItemAction struct {
 	DurationSec string             `json:"durationSec"`
 }
 
+type ChatRenderer interface {
+	ChatMessage() string
+}
+
 type ChatItem struct {
 	LiveChatViewerEngagementMessageRenderer LiveChatViewerEngagementMessageRenderer `json:"liveChatViewerEngagementMessageRenderer"`
 	LiveChatTextMessageRenderer             LiveChatTextMessageRenderer             `json:"liveChatTextMessageRenderer"`
@@ -88,6 +96,22 @@ type LiveChatViewerEngagementMessageRenderer struct {
 	Message       Message `json:"message"`
 }
 
+func (r *LiveChatViewerEngagementMessageRenderer) ChatMessage() string {
+	var buf bytes.Buffer
+
+	buf.WriteByte('[')
+	for _, v := range r.Message.Runs {
+		if v.Text != "" {
+			buf.WriteString(v.Text)
+		} else {
+			buf.WriteString(v.Emoji.Image.Accessibility.AccessibilityData.Label)
+		}
+	}
+	buf.WriteByte(']')
+
+	return buf.String()
+}
+
 type LiveChatTextMessageRenderer struct {
 	ID                       string              `json:"id"`
 	TimestampUsec            string              `json:"timestampUsec"`
@@ -102,6 +126,21 @@ type LiveChatTextMessageRenderer struct {
 	TimestampText            TimestampText       `json:"timestampText"`
 }
 
+func (r *LiveChatTextMessageRenderer) ChatMessage() string {
+	var buf bytes.Buffer
+
+	buf.WriteString(r.AuthorName.SimpleText + ": ")
+	for _, run := range r.Message.Runs {
+		if run.Text != "" {
+			buf.WriteString(run.Text)
+		} else {
+			buf.WriteString(run.Emoji.Image.Accessibility.AccessibilityData.Label)
+		}
+	}
+
+	return buf.String()
+}
+
 type LiveChatMembershipItemRenderer struct {
 	ID                       string              `json:"id"`
 	TimestampUsec            string              `json:"timestampUsec"`
@@ -112,6 +151,19 @@ type LiveChatMembershipItemRenderer struct {
 	AuthorBadges             []AuthorBadge       `json:"authorBadges"`
 	ContextMenuEndpoint      ContextMenuEndpoint `json:"contextMenuEndpoint"`
 	ContextMenuAccessibility Accessibility       `json:"contextMenuAccessibility"`
+}
+
+func (r *LiveChatMembershipItemRenderer) ChatMessage() string {
+	var buf bytes.Buffer
+
+	buf.WriteByte('[')
+	for _, run := range r.HeaderSubtext.Runs {
+		buf.WriteString(run.Text)
+	}
+	buf.WriteString("] ")
+	buf.WriteString(r.AuthorName.SimpleText)
+
+	return buf.String()
 }
 
 type LiveChatPaidMessageRenderer struct {
@@ -134,9 +186,29 @@ type LiveChatPaidMessageRenderer struct {
 	TrackingParams           string              `json:"trackingParams"`
 }
 
+func (r *LiveChatPaidMessageRenderer) ChatMessage() string {
+	var buf bytes.Buffer
+
+	buf.WriteString("[" + r.PurchaseAmountText.SimpleText + "] ")
+	buf.WriteString(r.AuthorName.SimpleText + ": ")
+	for _, run := range r.Message.Runs {
+		if run.Text != "" {
+			buf.WriteString(run.Text)
+		} else {
+			buf.WriteString(run.Emoji.Image.Accessibility.AccessibilityData.Label)
+		}
+	}
+
+	return buf.String()
+}
+
 type LiveChatPlaceholderItemRenderer struct {
 	ID            string `json:"id"`
 	TimestampUsec string `json:"timestampUsec"`
+}
+
+func (r *LiveChatPlaceholderItemRenderer) ChatMessage() string {
+	return ""
 }
 
 type LiveChatTickerPaidMessageItemRenderer struct {
