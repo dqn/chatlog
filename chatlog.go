@@ -25,10 +25,7 @@ type FetchResult struct {
 }
 
 func New(videoID string) *Chatlog {
-	return &Chatlog{
-		videoID: videoID,
-		client:  &http.Client{},
-	}
+	return &Chatlog{videoID, &http.Client{}}
 }
 
 func (c *Chatlog) GetInitialContinuation() (string, error) {
@@ -130,7 +127,7 @@ func retrieveContinuation(body []byte) (string, error) {
 	}
 
 	b := make([]byte, 256)
-	for i := index + len(query); s[i] != byte('"'); i++ {
+	for i := index + len(query); s[i] != '"'; i++ {
 		b = append(b, s[i])
 	}
 
