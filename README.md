@@ -25,30 +25,46 @@ func main() {
   c := chatlog.New("VIDEO_ID")
 
   err := c.HandleChat(func(renderer ChatRenderer) error {
-    switch renderer.(type) {
+    switch r := renderer.(type) {
+    // System message
     case *LiveChatViewerEngagementMessageRenderer:
-      fmt.Println(renderer.ChatMessage())
+      // Print formatted message.
       // e.g. "[Live chat replay is on. Messages that appeared when the stream was live will show up here.]"
+      fmt.Println(renderer.ChatMessage())
       return nil
 
+    // Chat message
     case *LiveChatTextMessageRenderer:
-      fmt.Println(renderer.ChatMessage())
+      fmt.Println(r.AuthorName.SimpleText)         // Author name
+      fmt.Println(r.AuthorExternalChannelID)       // Channel ID
+      fmt.Println(r.AuthorPhoto.Thumbnails[0].URL) // Icon URL
+
+      // Print formatted message.
       // e.g. "Alice: hello!"
+      fmt.Println(renderer.ChatMessage())
       return nil
 
+    // Membership joining
     case *LiveChatMembershipItemRenderer:
-      fmt.Println(renderer.ChatMessage())
+      fmt.Println(r.AuthorName.SimpleText)         // Author name
+      fmt.Println(r.AuthorExternalChannelID)       // Channel ID
+      fmt.Println(r.AuthorPhoto.Thumbnails[0].URL) // Icon URL
+
+      // Print formatted message.
       // e.g. "[Welcome to Membership!] Bob"
+      fmt.Println(renderer.ChatMessage())
       return nil
 
+    // Super Chat
     case *LiveChatPaidMessageRenderer:
-      fmt.Println(renderer.ChatMessage())
-      // e.g. "[$10.00] Carol: bye!"
-      return nil
+      fmt.Println(r.AuthorName.SimpleText)         // Author name
+      fmt.Println(r.AuthorExternalChannelID)       // Channel ID
+      fmt.Println(r.AuthorPhoto.Thumbnails[0].URL) // Icon URL
+      fmt.Println(r.PurchaseAmountText.SimpleText) // Super Chat Amount
 
-    case *LiveChatPlaceholderItemRenderer:
+      // Print formatted message.
+      // e.g. "[$10.00] Carol: bye!"
       fmt.Println(renderer.ChatMessage())
-      // (empty)
       return nil
     }
   })
@@ -62,11 +78,15 @@ func main() {
 Also can custom message.
 
 ```go
+// Example for LiveChatTextMessageRenderer.
+
+r, _ := renderer.(*LiveChatTextMessageRenderer)
+
 var buf bytes.Buffer
 
-buf.WriteString(renderer.AuthorName.SimpleText + "> ")
+buf.WriteString(r.AuthorName.SimpleText + "> ")
 
-for _, run := range renderer.Message.Runs {
+for _, run := range r.Message.Runs {
   if run.Text != "" {
     buf.WriteString(run.Text)
   } else {
