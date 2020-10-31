@@ -2,7 +2,7 @@
 
 [![build status](https://github.com/dqn/chatlog/workflows/build/badge.svg)](https://github.com/dqn/chatlog/actions)
 
-YouTube Live archive chats fecher. Premiered videos are also supported.
+YouTube Live archive chats fetcher. Premiered videos are also supported.
 
 ## Installation
 
