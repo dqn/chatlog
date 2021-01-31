@@ -2,6 +2,8 @@
 
 [![build status](https://github.com/dqn/chatlog/workflows/build/badge.svg)](https://github.com/dqn/chatlog/actions)
 
+**Due to changes in YouTube's private API, this package is no longer available.**
+
 YouTube Live archive chats fetcher. Premiered videos are also supported.
 
 ## Installation
